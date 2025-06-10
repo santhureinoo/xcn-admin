@@ -1,4 +1,4 @@
-const BASE_API_URL = 'http://localhost:3001';
+const BASE_API_URL = 'https://916e-2a09-bac1-6f20-00-2e5-72.ngrok-free.app';
 
 // Define types for the auth responses
 export interface User {
