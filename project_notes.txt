@@ -1,0 +1,323 @@
+# Project Structure and Stack Overview
+
+## Project Overview
+We're building a mobile-friendly web application for game-related services, including packages, accounts, and in-game currency purchases. The application has both guest and authenticated user experiences with comprehensive admin management capabilities.
+
+## Tech Stack
+- **Frontend Framework**: React with TypeScript
+- **Routing**: React Router v6
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **Internationalization**: i18next
+- **Authentication**: Custom auth implementation with JWT
+- **Mobile Experience**: Touch gestures, smooth transitions, responsive design
+
+## Key Features Implemented
+1. **Authentication System**
+   - Login/Register pages
+   - Protected routes with role-based access control
+   - Auth context with user state management
+   - Redirect handling for guest/authenticated users
+   - Admin role verification and protection
+
+2. **Guest Home Page**
+   - Landing page for non-authenticated users
+   - Service showcases (social media accounts, ML diamonds, ML accounts)
+   - Promotional carousel
+   - Testimonials section
+
+3. **Packages System**
+   - Package browsing with filtering and sorting
+   - Package details modal
+   - Infinite scroll implementation
+   - Different package types (diamond, weekly, monthly, special)
+   - Optimized rendering with React.memo
+   - Package ordering system with multi-command support
+   - Order summary and confirmation
+
+4. **Transaction Management**
+   - Currency transactions page
+   - Package transactions page
+   - Transaction details view
+   - Transaction status indicators
+   - Transaction history with infinite scroll
+
+5. **Mobile Experience Enhancements**
+   - Swipe gestures for sidebar navigation
+   - Smooth page transitions with direction awareness
+   - Touch-friendly UI components
+   - Responsive layouts for all screen sizes
+
+6. **UI Components**
+   - Layout components (Sidebar, Navbar)
+   - Theme toggle (light/dark mode)
+   - Language selector
+   - Dropdown menus
+   - Loading spinners
+   - Data tables with sorting
+   - Command input with add/remove functionality
+   - Order summary modal
+
+7. **Data Visualization & Analytics**
+   - Package transaction analytics dashboard
+   - Order success rate visualization with progress bars
+   - Processing metrics cards with key performance indicators
+   - Monthly spending trend charts with interactive tooltips
+   - Popular packages ranking with gradient progress bars
+   - Comprehensive dummy data structure for analytics
+   - Modular chart components for reusability
+
+8. **Admin Management System**
+   - Role-based access control (admin, retailer, reseller)
+   - Comprehensive user management interface
+   - Advanced package management system
+   - Admin-only routes and components
+   - Enhanced sidebar with admin section
+
+9. **Admin Transaction Management System** *(NEW)*
+   - Comprehensive transaction type system with 5 distinct transaction types
+   - Component-based architecture for different transaction types
+   - Type-specific UI components with detailed information display
+   - Status management and admin controls
+
+## Project Structure
+- `/src`
+  - `/components`
+    - `/layout`: Layout components (Layout.tsx, Navbar.tsx, Sidebar.tsx, PageTransition.tsx)
+    - `/packages`: Package-related components (PackageCard.tsx, PackageGrid.tsx, CommandInput.tsx, OrderSummaryModal.tsx, etc.)
+    - `/transactions`: Transaction-related components (TransactionStatusBadge.tsx, etc.)
+    - `/ui`: Reusable UI components (dropdown-menu.tsx, language-selector.tsx, data-table.tsx, etc.)
+    - `/charts`: Data visualization components
+      - `OrderSuccessRateChart.tsx`: Progress bar visualization for order status distribution
+      - `ProcessingMetricsCard.tsx`: Key metrics display with failure reason analysis
+      - `MonthlyTrendChart.tsx`: Bar chart for spending trends with hover tooltips
+      - `PopularPackagesChart.tsx`: Ranking visualization with gradient progress bars
+    - `/admin`: Admin-specific components
+      - `/users`: User management components
+        - `UserManagementHeader.tsx`: Header with actions and search
+        - `UserStatsCards.tsx`: Statistics overview cards
+        - `UserFilters.tsx`: Advanced filtering component
+        - `UserTable.tsx`: Data table with user information
+        - `UserDetailModal.tsx`: Detailed user information modal
+        - `AddEditUserModal.tsx`: User creation and editing modal
+      - `/packages`: Package management components
+        - `PackageTable.tsx`: Admin package data table with actions
+        - `AddEditPackageModal.tsx`: Package creation and editing modal
+        - `PackageDetailModal.tsx`: Detailed package information modal
+      - `/transactions`: Transaction management components *(NEW)*
+        - `TransactionTypeBadge.tsx`: Badge component for transaction types
+        - `TransactionStatusBadge.tsx`: Badge component for transaction status
+        - `/types`: Type-specific transaction components
+          - `RetailerXCoinPurchaseCard.tsx`: Retailer XCoin purchase display
+          - `RetailerPackagePurchaseCard.tsx`: Retailer package purchase display
+          - `ResellerBulkPurchaseCard.tsx`: Reseller bulk purchase display
+          - `VendorExchangeCard.tsx`: Vendor exchange record display
+    - `/order`: Order process components
+      - `StepIndicator.tsx`: Multi-step process indicator
+      - `GameInfoStep.tsx`: Game information input step
+      - `AuthSection.tsx`: Authentication section for orders
+      - `PackageSelectionStep.tsx`: Package selection interface
+      - `PaymentMethodStep.tsx`: Payment method selection
+      - `PaymentConfirmStep.tsx`: Payment confirmation step
+  - `/contexts`: React Context providers (AuthContext.tsx, ThemeContext.tsx, MusicContext.tsx)
+  - `/data`: Sample data (samplePackages.ts, sampleTransactions.ts, samplePackageAnalytics.ts)
+  - `/hooks`: Custom React hooks (useAuth.ts, usePackageFiltering.ts, useInfiniteScroll.ts, useTransactionList.ts)
+  - `/i18n`: Internationalization setup
+  - `/pages`: Page components
+    - Main pages: GuestHomePage.tsx, HomePage.tsx, PackagesPage.tsx, PackageOrderPage.tsx
+    - Transaction pages: CurrencyTransactionsPage.tsx, PackageTransactionsPage.tsx, TransactionDetailPage.tsx
+    - Admin pages:
+      - `admin/UserManagementPage.tsx`: Complete user management interface
+      - `admin/PackageManagementPage.tsx`: Complete package management interface
+      - `admin/CurrencyManagementPage.tsx`: Currency management interface *(NEW)*
+  - `/services`: API service functions (authService.ts, packageService.ts, transactionService.ts)
+  - `/types`: TypeScript type definitions
+    - `user.ts`: User-related types with role definitions
+    - `package.ts`: Enhanced package types with vendor information
+    - `transaction.ts`: Comprehensive transaction types with 5 distinct transaction types *(NEW)*
+
+## Admin Transaction Management System *(NEW)*
+
+### Transaction Types
+1. **Retailer XCoin Purchase** (`retailer_xcoin_purchase`)
+   - Retailer buying XCoin from platform using external currency
+   - Includes exchange rates, processing fees, payment methods
+   - Admin approval workflow for pending purchases
+
+2. **Retailer Package Purchase** (`retailer_package_purchase`)
+   - Retailer buying packages from platform using XCoin
+   - Includes game information, package details, XCoin costs
+   - Automatic processing with vendor integration
+
+3. **Reseller XCoin Request** (`reseller_xcoin_request`)
+   - Reseller requesting XCoin fill from admin (handled outside platform)
+   - Manual admin approval process with external payment verification
+   - Integration with user management system for manual XCoin addition
+
+4. **Reseller Bulk Purchase** (`reseller_bulk_purchase`)
+   - Reseller buying multiple packages via prompt interface
+   - Bulk discount calculations and package grouping
+   - Different from regular client interface
+
+5. **Vendor Exchange** (`vendor_exchange`)
+   - Actual records of XCoin to vendor coin exchanges
+   - Links to original purchase transactions
+   - Vendor API response tracking and exchange rate records
+
+### Component Architecture
+- **Type-Specific Components**: Each transaction type has its own display component
+- **Modular Design**: Reusable badge components for status and type
+- **Detailed Information Display**: Comprehensive transaction details with user info, costs, timestamps
+- **Admin Actions**: Status update controls and detailed view options
+- **Responsive Design**: Mobile-friendly layouts with collapsible sections
+
+### Development Approach *(IMPORTANT)*
+- **Component-by-Component Development**: Build one component at a time, ask for direction before proceeding
+- **Iterative Feedback**: Get approval and direction for each component before moving to the next
+- **Focused Implementation**: Avoid building everything at once, focus on specific functionality
+- **Clear Communication**: Ask specific questions about layout, features, and priorities
+
+## Current Progress
+1. **Completed**:
+   - Basic application structure and routing
+   - Authentication system with role-based protected routes
+   - Guest home page with service showcases
+   - Packages browsing page with filtering and infinite scroll
+   - Package ordering system with multi-command support
+   - Theme switching and internationalization
+   - Mobile swipe gestures for sidebar
+   - Smooth page transitions
+   - Transaction management pages
+   - Data visualization system for package transactions
+   - Comprehensive analytics dashboard with interactive charts
+   - Modular chart component architecture
+   - **Complete admin user management system**
+   - **Complete admin package management system**
+   - **Role-based access control and admin routes**
+   - **Enhanced sidebar with admin section and user info**
+   - **Admin transaction type system with 5 transaction types** *(NEW)*
+   - **Type-specific transaction display components** *(NEW)*
+   - **Transaction status and type badge components** *(NEW)*
+
+2. **In Progress**:
+   - **Admin transaction filters component** *(CURRENT)*
+   - Further optimizing package card rendering performance
+   - Enhancing mobile gesture support
+   - Improving animation performance
+   - Refining the order submission process
+
+3. **Next Steps**:
+   - Complete the admin transaction management page
+   - Add transaction detail modals
+   - Implement transaction status update functionality
+   - Add transaction statistics dashboard
+   - **Add admin transaction management page** 
+   - **Add admin reports and analytics dashboard**
+   - **Add admin settings management**
+   - **Add bulk operations for transaction management**
+
+## Development Notes
+- Using CDN images for package thumbnails
+- Authentication is currently simulated with localStorage
+- Infinite scroll implemented with Intersection Observer API
+- Page transitions use CSS animations for performance
+- Swipe gestures implemented with touch events
+- Mobile detection uses window.innerWidth for responsive behavior
+- Order submission is currently mocked with simulated API responses
+- Command validation uses regex to ensure proper format
+- Error handling includes user-friendly messages for validation failures
+- Component architecture follows a modular approach for better maintainability
+- Reusable components are designed to be flexible and configurable
+- Dark mode support is implemented throughout the application
+- Internationalization is set up for all user-facing text
+- Form submissions include loading states and success/error feedback
+- Modal components use portals for better stacking context management
+- Responsive design is implemented using Tailwind's breakpoint system
+- Chart components use CSS gradients and animations for visual appeal
+- Data visualization follows consistent color schemes and spacing
+- Analytics components are designed for easy data source swapping
+- **Admin components follow consistent design patterns**
+- **Role-based access control implemented throughout**
+- **Mock data structures support realistic admin scenarios**
+- **Transaction components use type-specific layouts and information display** *(NEW)*
+- **Component-by-component development approach for better quality and feedback** *(NEW)*
+- Performance optimizations include:
+  - Memoization of expensive components
+  - Lazy loading of routes
+  - Virtualization for long lists
+  - Debouncing of search inputs
+  - Throttling of scroll event handlers
+  - Optimized chart rendering with CSS transforms
+  - **Efficient admin table rendering with pagination**
+- Accessibility features include:
+  - Proper ARIA attributes
+  - Keyboard navigation support
+  - Focus management
+  - Screen reader friendly content
+  - Sufficient color contrast
+  - Chart accessibility with proper labels and descriptions
+  - **Admin interface accessibility compliance**
+- Security considerations include:
+  - Input sanitization
+  - CSRF protection
+  - Secure authentication flow
+  - Protected routes with role verification
+  - Secure storage of sensitive information
+  - **Admin action confirmation dialogs**
+
+## Future Enhancements
+1. **User Experience**:
+   - Add more interactive elements like tooltips and popovers
+   - Implement guided tours for new users
+   - Add more animations and transitions for a polished feel
+   - Implement skeleton loaders for better loading states
+   - Add chart drill-down capabilities for detailed analysis
+   - Implement chart filtering and date range selection
+   - **Add admin dashboard with system overview**
+   - **Implement admin notification system**
+
+2. **Performance**:
+   - Implement code splitting for larger bundles
+   - Add service worker for offline support and caching
+   - Optimize image loading with lazy loading and WebP format
+   - Implement server-side rendering for initial page load
+   - Add chart data caching and lazy loading
+   - Implement virtual scrolling for large datasets
+   - **Add pagination for admin tables**
+   - **Implement admin data caching**
+
+3. **Features**:
+   - Add social sharing capabilities
+   - Implement user profiles with avatars and preferences
+   - Add a notification system for order updates
+   - Implement a chat support system
+   - Add a wishlist feature for packages
+   - Implement a referral system with rewards
+   - Add real-time analytics dashboard updates
+   - Implement chart export to PDF/PNG formats
+   - Add comparative analytics between time periods
+   - Implement predictive analytics for trends
+   - **Add admin transaction management with bulk operations**
+   - **Implement admin reports and analytics**
+   - **Add admin settings management**
+   - **Add admin audit logs**
+   - **Add admin backup and restore functionality**
+   - **Implement real-time transaction monitoring**
+   - **Add automated transaction processing workflows**
+
+4. **Technical Debt**:
+   - Improve test coverage with unit and integration tests
+   - Set up end-to-end testing with Cypress
+   - Implement stricter TypeScript configurations
+   - Add more comprehensive error logging
+   - Refactor CSS for better maintainability
+   - Implement a design system for consistent UI components
+   - Add unit tests for chart components
+   - Implement chart performance monitoring
+   - Add data validation for analytics inputs
+   - **Add unit tests for admin components**
+   - **Implement admin action logging**
+   - **Implement admin performance monitoring**
+   - **Implement admin data validation**
+   - **Add unit tests for transaction components** *(NEW)*
+   - **Implement transaction processing monitoring** *(NEW)*
