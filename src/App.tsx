@@ -187,7 +187,7 @@ function AppRoutes() {
         {/* Admin dashboard redirect */}
         <Route path="/admin" element={
           <AdminRoute element={
-            <Navigate to="/admin/users" replace />
+            <Navigate to="/admin/users" repla ce />
           } />
         } />
 
