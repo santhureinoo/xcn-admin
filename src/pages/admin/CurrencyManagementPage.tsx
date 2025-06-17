@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CurrencyStatsCards from '../../components/admin/currency/CurrencyStatsCards';
 import CurrencyRatesManagement from '../../components/admin/currency/CurrencyRatesManagement';
+import VendorRatesManagement from '../../components/admin/currency/VendorRatesManagement';
 import currencyService from '../../services/currencyService';
 
 interface CurrencyStats {
@@ -73,6 +74,11 @@ const CurrencyManagementPage: React.FC = () => {
 
         {/* Exchange Rates Management */}
         <CurrencyRatesManagement />
+
+        {/* Add Vendor Rates Management here */}
+        <div className="mt-8">
+          <VendorRatesManagement />
+        </div>
 
         {/* Additional Info */}
         <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">

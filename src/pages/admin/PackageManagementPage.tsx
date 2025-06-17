@@ -268,7 +268,7 @@ const PackageManagementPage: React.FC = () => {
           ]
         }
       ]);
-      
+
       // setVendorNames(vendorNamesData);
     } catch (error: any) {
       console.error('Failed to load filter data:', error);
@@ -376,6 +376,7 @@ const PackageManagementPage: React.FC = () => {
     const updatedPackages = packages.map(p =>
       p.id === updatedPackage.id ? updatedPackage : p
     );
+
     setPackages(updatedPackages);
     setFilteredPackages(updatedPackages);
 
@@ -395,16 +396,20 @@ const PackageManagementPage: React.FC = () => {
 
   const handleSavePackage = async (packageData: Partial<Package>) => {
     setSaveLoading(true);
-    console.log(packageData);
     try {
       if (editingPackage) {
         // Update existing package
         const response = await packageService.updatePackage(editingPackage.id, packageData);
 
+        console.log(response);
+
         // Update the package in the list
         const updatedPackages = packages.map(p =>
           p.id === editingPackage.id ? response.package : p
         );
+
+        console.log(updatedPackages);
+
         setPackages(updatedPackages);
         setFilteredPackages(updatedPackages);
 
@@ -640,7 +645,7 @@ const PackageManagementPage: React.FC = () => {
 
                   {/* Page numbers */}
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
+                    let pageNum: any;
                     if (totalPages <= 5) {
                       pageNum = i + 1;
                     } else if (currentPage <= 3) {

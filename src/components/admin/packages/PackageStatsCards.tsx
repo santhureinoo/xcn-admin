@@ -30,6 +30,8 @@ const PackageStatsCards: React.FC<PackageStatsCardsProps> = ({ stats, loading = 
       color: 'bg-blue-500',
       textColor: 'text-blue-600',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      trend: '+12%',
+      trendColor: 'text-green-600 dark:text-green-400'
     },
     {
       title: 'Active Packages',
@@ -66,13 +68,14 @@ const PackageStatsCards: React.FC<PackageStatsCardsProps> = ({ stats, loading = 
       color: 'bg-red-500',
       textColor: 'text-red-600',
       bgColor: 'bg-red-50 dark:bg-red-900/20',
+      alert: stats.outOfStockPackages > 0
     },
     {
       title: 'Total Stock',
       value: stats.totalStock,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v2a1 1 0 01-1 1h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8H3a1 1 0 01-1-1V5a1 1 0 011-1h4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
       ),
       color: 'bg-purple-500',
@@ -95,17 +98,19 @@ const PackageStatsCards: React.FC<PackageStatsCardsProps> = ({ stats, loading = 
 
   if (loading) {
     return (
-      <div className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+      <div className="mb-8">
+        {/* Loading skeleton with multiple rows */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="animate-pulse">
-                <div className="flex items-center">
+                <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                  <div className="ml-4 flex-1">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                  </div>
+                  <div className="w-8 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
                 </div>
               </div>
             </div>
@@ -116,49 +121,92 @@ const PackageStatsCards: React.FC<PackageStatsCardsProps> = ({ stats, loading = 
   }
 
   return (
-    <div className="mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+    <div className="mb-8">
+      {/* Multi-row responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {statsCards.map((card, index) => (
           <div
             key={index}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 p-6"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 p-6 group"
           >
-            <div className="flex items-center">
-              <div className={`flex-shrink-0 ${card.bgColor} rounded-lg p-3`}>
+            {/* Header with Icon */}
+            <div className="flex items-center justify-between mb-4">
+              <div className={`flex-shrink-0 ${card.bgColor} rounded-lg p-3 group-hover:scale-105 transition-transform duration-200`}>
                 <div className={`${card.textColor} dark:text-white`}>
                   {card.icon}
                 </div>
               </div>
-              <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
-                  {card.title}
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
-                </p>
-              </div>
+              
+              {/* Trend or Alert Badge */}
+              {card.trend && (
+                <div className="flex items-center text-sm font-medium">
+                  <svg className="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  <span className={card.trendColor}>{card.trend}</span>
+                </div>
+              )}
+              
+              {card.alert && (
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {card.title}
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
+              </p>
             </div>
             
-            {/* Optional trend indicator for total packages */}
-            {card.title === 'Total Packages' && (
-              <div className="mt-4 flex items-center text-sm">
-                <svg className="w-4 h-4 text-green-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                <span className="text-green-600 dark:text-green-400 font-medium">+12%</span>
-                <span className="text-gray-600 dark:text-gray-400 ml-1">from last month</span>
-              </div>
-            )}
-            
-            {/* Alert for out of stock */}
-            {card.title === 'Out of Stock' && stats.outOfStockPackages > 0 && (
-              <div className="mt-4 flex items-center text-sm">
-                <svg className="w-4 h-4 text-red-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <span className="text-red-600 dark:text-red-400 font-medium">Needs attention</span>
-              </div>
-            )}
+            {/* Footer Info */}
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+              {card.title === 'Total Packages' && card.trend && (
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span>from last month</span>
+                </div>
+              )}
+              
+              {card.title === 'Out of Stock' && stats.outOfStockPackages > 0 && (
+                <div className="flex items-center text-sm">
+                  <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <span className="text-red-600 dark:text-red-400 font-medium">Needs attention</span>
+                </div>
+              )}
+              
+              {card.title === 'Active Packages' && (
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  <span>Currently available</span>
+                </div>
+              )}
+              
+              {card.title === 'Total Stock' && (
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span>Items in inventory</span>
+                </div>
+              )}
+              
+              {card.title === 'Average Price' && (
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span>Across all packages</span>
+                </div>
+              )}
+              
+              {card.title === 'Inactive Packages' && stats.inactivePackages > 0 && (
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                  <span>Temporarily disabled</span>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>

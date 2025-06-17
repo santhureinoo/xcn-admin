@@ -6,7 +6,7 @@ export interface CreatePackageRequest {
   description: string;
   price: number;
   imageUrl?: string;
-  type?: 'diamond' | 'weekly' | 'monthly' | 'special' | 'subscription';
+  type?: string;
   gameId?: string;
   featured?: boolean;
   discount?: number;
@@ -17,14 +17,18 @@ export interface CreatePackageRequest {
   vendor: string;
   vendorPackageCodes: string[];
   vendorPrice: number;
+  baseVendorCost: number;
   currency: string;
   status?: 'active' | 'inactive' | 'out_of_stock';
   stock?: number;
   resellKeyword?: string;
+  isPriceLocked?: boolean;
 }
 
 export interface UpdatePackageRequest extends Partial<CreatePackageRequest> {
   id?: string;
+  baseVendorCost?: number;
+  isPriceLocked?: boolean;
 }
 
 export interface PackagesResponse {
@@ -154,7 +158,6 @@ class PackageService {
 
   async createPackage(packageData: CreatePackageRequest): Promise<any> {
     try {
-      // Prepare the data for backend
       const backendData = {
         name: packageData.name,
         description: packageData.description,
@@ -165,12 +168,14 @@ class PackageService {
         vendor: packageData.vendor,
         vendorPackageCodes: packageData.vendorPackageCodes,
         vendorPrice: Number(packageData.vendorPrice),
+        baseVendorCost: Number(packageData.baseVendorCost),
         currency: packageData.currency,
         status: packageData.status?.toUpperCase() || 'ACTIVE',
         resellKeyword: packageData.resellKeyword || '',
         stock: packageData.stock ? Number(packageData.stock) : 0,
         discount: packageData.discount ? Number(packageData.discount) : 0,
         amount: packageData.amount ? Number(packageData.amount) : 0,
+        isPriceLocked: packageData.isPriceLocked || false,
         // Optional fields
         ...(packageData.type && { type: packageData.type.toUpperCase() }),
         ...(packageData.gameId && { gameId: packageData.gameId }),
@@ -190,7 +195,6 @@ class PackageService {
 
   async updatePackage(id: string, packageData: UpdatePackageRequest): Promise<{ success: boolean; package: Package; message: string }> {
     try {
-      // Prepare the data for backend, only include fields that are provided
       const backendData: any = {};
 
       if (packageData.name !== undefined) backendData.name = packageData.name;
@@ -202,11 +206,13 @@ class PackageService {
       if (packageData.vendor !== undefined) backendData.vendor = packageData.vendor;
       if (packageData.vendorPackageCodes !== undefined) backendData.vendorPackageCodes = packageData.vendorPackageCodes;
       if (packageData.vendorPrice !== undefined) backendData.vendorPrice = Number(packageData.vendorPrice);
+      if (packageData.baseVendorCost !== undefined) backendData.baseVendorCost = Number(packageData.baseVendorCost);
       if (packageData.currency !== undefined) backendData.currency = packageData.currency;
       if (packageData.status !== undefined) backendData.status = packageData.status.toUpperCase();
       if (packageData.stock !== undefined) backendData.stock = Number(packageData.stock);
       if (packageData.discount !== undefined) backendData.discount = Number(packageData.discount);
       if (packageData.amount !== undefined) backendData.amount = Number(packageData.amount);
+      if (packageData.isPriceLocked !== undefined) backendData.isPriceLocked = packageData.isPriceLocked;
 
       // Optional fields
       if (packageData.type !== undefined) backendData.type = packageData.type.toUpperCase();

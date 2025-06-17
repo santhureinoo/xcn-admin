@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Vendor, VendorPackage } from '../../../types/package';
+import currencyService from '../../../services/currencyService';
 
 interface AddEditPackageModalProps {
     package: Package | null;
@@ -34,13 +35,14 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
         vendor: '',
         vendorPackageCodes: [] as string[],
         vendorPrice: 0,
+        baseVendorCost: 0,
         currency: 'coin',
         status: 'active' as Package['status'],
         resellKeyword: '',
         stock: undefined as number | undefined,
-        discount: 0
+        discount: 0,
+        isPriceLocked: false
     });
-
     const [availableVendorPackages, setAvailableVendorPackages] = useState<VendorPackage[]>([]);
     const [selectedVendorPackages, setSelectedVendorPackages] = useState<VendorPackage[]>([]);
 
@@ -59,11 +61,13 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
                     vendor: pkg.vendor,
                     vendorPackageCodes: pkg.vendorPackageCode.split(','), // Use existing codes
                     vendorPrice: pkg.vendorPrice,
+                    baseVendorCost: pkg.baseVendorCost || 0,
                     currency: pkg.currency,
                     status: pkg.status,
                     resellKeyword: pkg.resellKeyword || '',
                     stock: pkg.stock || 0,
-                    discount: pkg.discount || 0
+                    discount: pkg.discount || 0,
+                    isPriceLocked: pkg.isPriceLocked || false
                 });
             } else {
                 // Add mode
@@ -77,11 +81,13 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
                     vendor: '',
                     vendorPackageCodes: [],
                     vendorPrice: 0,
+                    baseVendorCost: 0,
                     resellKeyword: '',
                     currency: 'coin',
                     status: 'active',
                     stock: 0,
-                    discount: 0
+                    discount: 0,
+                    isPriceLocked: false
                 });
             }
         }
@@ -128,32 +134,82 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
     useEffect(() => {
         if (selectedVendorPackages.length > 0 && !pkg) {
             // Only auto-calculate for new packages, not when editing
-            const totalPrice = selectedVendorPackages.reduce((sum, pkg) => sum + pkg.price, 0);
-            const avgPrice = totalPrice / selectedVendorPackages.length;
-            const totalAmount = selectedVendorPackages.reduce((sum, pkg) => sum + (pkg.diamonds || 0), 0);
+            const fetchVendorRatesAndCalculate = async () => {
+                try {
+                    const totalPrice = selectedVendorPackages.reduce((sum, pkg) => sum + pkg.price, 0);
+                    const avgPrice = totalPrice / selectedVendorPackages.length;
+                    const totalAmount = selectedVendorPackages.reduce((sum, pkg) => sum + (pkg.diamonds || 0), 0);
+                    
+                    // Get vendor rates
+                    const vendorRatesResponse = await currencyService.getVendorRates();
+                    const vendorRates = vendorRatesResponse.rates;
+                    
+                    // Find the matching vendor rate for current vendor
+                    const currentVendorRate = vendorRates.find(rate => 
+                        rate.vendorName.toLowerCase() === formData.vendor.toLowerCase()
+                    );
+                    
+                    // Calculate vendor price using xCoinRate
+                    const xCoinRate = currentVendorRate?.xCoinRate || 1;
+                    const calculatedVendorPrice = totalPrice * xCoinRate;
 
-            // const currency = selectedVendorPackages[0]?.currency || 'RM';
-            const currency = 'coin';
-            const packageNames = selectedVendorPackages.map(pkg => pkg.name).join(' + ');
+                    const currency = 'coin';
+                    const packageNames = selectedVendorPackages.map(pkg => pkg.name).join(' + ');
 
-            setFormData(prev => ({
-                ...prev,
-                vendorPrice: avgPrice,
-                currency: currency,
-                amount: totalAmount,
-                name: `${prev.gameName} ${packageNames} - ${prev.region}`,
-                description: `Bundle: ${packageNames} for ${prev.gameName} in ${prev.region}`,
-                price: avgPrice * 1.15 // Add 15% markup as default
-            }));
+                    setFormData(prev => ({
+                        ...prev,
+                        vendorPrice: calculatedVendorPrice, // Use calculated price with xCoinRate
+                        baseVendorCost: totalPrice, // Keep original total price as base cost
+                        currency: currency,
+                        amount: totalAmount,
+                        name: `${prev.gameName} ${packageNames} - ${prev.region}`,
+                        description: `Bundle: ${packageNames} for ${prev.gameName} in ${prev.region}`,
+                        price: calculatedVendorPrice * 1.15 // Add 15% markup to the calculated vendor price
+                    }));
+                } catch (error) {
+                    console.error('Error fetching vendor rates:', error);
+                    // Fallback to original calculation if vendor rates fetch fails
+                    const totalPrice = selectedVendorPackages.reduce((sum, pkg) => sum + pkg.price, 0);
+                    const avgPrice = totalPrice / selectedVendorPackages.length;
+                    const totalAmount = selectedVendorPackages.reduce((sum, pkg) => sum + (pkg.diamonds || 0), 0);
+
+                    const currency = 'coin';
+                    const packageNames = selectedVendorPackages.map(pkg => pkg.name).join(' + ');
+
+                    setFormData(prev => ({
+                        ...prev,
+                        vendorPrice: totalPrice, // Use total price as fallback
+                        baseVendorCost: totalPrice,
+                        currency: currency,
+                        amount: totalAmount,
+                        name: `${prev.gameName} ${packageNames} - ${prev.region}`,
+                        description: `Bundle: ${packageNames} for ${prev.gameName} in ${prev.region}`,
+                        price: totalPrice * 1.15
+                    }));
+                }
+            };
+
+            fetchVendorRatesAndCalculate();
         }
-    }, [selectedVendorPackages, pkg]);
+    }, [selectedVendorPackages, pkg, formData.vendor]); // Add formData.vendor to dependencies
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'number' ? parseFloat(value) || 0 : value
-        }));
+        
+        // Handle checkbox inputs
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setFormData(prev => ({
+                ...prev,
+                [name]: checked
+            }));
+        } else {
+            // Handle other inputs
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'number' ? parseFloat(value) || 0 : value
+            }));
+        }
     };
 
     const handleVendorPackageToggle = (packageCode: string) => {
@@ -167,14 +223,22 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
             const newCodes = formData.vendorPackageCodes.filter(code => code !== packageCode);
             const newSelected = selectedVendorPackages.filter(pkg => pkg.code !== packageCode);
 
-            setFormData(prev => ({ ...prev, vendorPackageCodes: newCodes }));
+            setFormData(prev => ({ 
+                ...prev, 
+                vendorPackageCodes: newCodes, 
+                baseVendorCost: prev.baseVendorCost - vendorPackage.price // Subtract price when removing
+            }));
             setSelectedVendorPackages(newSelected);
         } else {
             // Add package
             const newCodes = [...formData.vendorPackageCodes, packageCode];
             const newSelected = [...selectedVendorPackages, vendorPackage];
 
-            setFormData(prev => ({ ...prev, vendorPackageCodes: newCodes }));
+            setFormData(prev => ({ 
+                ...prev, 
+                vendorPackageCodes: newCodes, 
+                baseVendorCost: prev.baseVendorCost + vendorPackage.price // Add price when adding
+            }));
             setSelectedVendorPackages(newSelected);
         }
     };
@@ -309,8 +373,21 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
                                             ))}
                                         </div>
                                         {formData.vendorPackageCodes.length > 0 && (
-                                            <div className="mt-2 text-sm text-green-600 dark:text-green-400">
-                                                Selected: {formData.vendorPackageCodes.length} package(s)
+                                            <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                                                <div className="text-sm text-blue-800 dark:text-blue-200">
+                                                    <div className="flex justify-between">
+                                                        <span>Selected packages:</span>
+                                                        <span className="font-medium">{formData.vendorPackageCodes.length}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span>Total vendor cost:</span>
+                                                        <span className="font-medium">{formData.currency} {formData.baseVendorCost}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span>Average price:</span>
+                                                        <span className="font-medium">{formData.currency} {formData.vendorPrice}</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
@@ -448,6 +525,29 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
                                             <option value="out_of_stock">Out of Stock</option>
                                         </select>
                                     </div>
+                                </div>
+
+                                {/* ADD THIS NEW SECTION - Price Lock Checkbox */}
+                                <div className="mt-4">
+                                    <div className="flex items-center space-x-3">
+                                        <input
+                                            type="checkbox"
+                                            id="isPriceLocked"
+                                            name="isPriceLocked"
+                                            checked={formData.isPriceLocked}
+                                            onChange={(e) => setFormData(prev => ({ 
+                                                ...prev, 
+                                                isPriceLocked: e.target.checked 
+                                            }))}
+                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                        />
+                                        <label htmlFor="isPriceLocked" className="text-sm font-medium text-gray-900 dark:text-gray-300">
+                                            🔒 Lock Price (Prevent automatic updates when exchange rates change)
+                                        </label>
+                                    </div>
+                                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        When enabled, this package price will not be automatically updated when vendor exchange rates change.
+                                    </p>
                                 </div>
 
                                 <div>

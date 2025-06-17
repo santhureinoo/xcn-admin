@@ -233,6 +233,61 @@ class CurrencyService {
       throw new Error(error.response?.data?.message || 'Failed to update exchange rate');
     }
   }
+
+  // Vendor Exchange Rate methods
+  async getVendorRates(): Promise<{ success: boolean; rates: VendorExchangeRate[] }> {
+    try {
+      const response = await axiosInstance.get('/vendor-rates');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch vendor rates');
+    }
+  }
+
+  async updateVendorRate(
+    vendorName: string, 
+    vendorCurrency: string, 
+    newRate: number, 
+    updatedBy: string, 
+    reason?: string
+  ): Promise<{ success: boolean; rate: VendorExchangeRate; message: string }> {
+    try {
+      const response = await axiosInstance.post('/vendor-rates/update', {
+        vendorName,
+        vendorCurrency,
+        newRate,
+        updatedBy,
+        reason
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to update vendor rate');
+    }
+  }
+
+  async getVendorRateHistory(vendorName: string, vendorCurrency: string): Promise<{ success: boolean; history: any }> {
+    try {
+      const response = await axiosInstance.get(`/vendor-rates/history/${vendorName}/${vendorCurrency}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch vendor rate history');
+    }
+  }
+}
+
+export interface VendorExchangeRate {
+  id: string;
+  vendorName: string;
+  vendorCurrency: string;
+  xCoinRate: number;
+  trend: 'UP' | 'DOWN' | 'STABLE';
+  change24h: number;
+  isActive: boolean;
+  previousRate?: number;
+  updatedBy?: string;
+  updateReason?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default new CurrencyService();
