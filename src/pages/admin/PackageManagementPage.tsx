@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, PackageFilters } from '../../types/package';
+import { MarkupOption, Package, PackageFilters } from '../../types/package';
 import PackageManagementHeader from '../../components/admin/packages/PackageManagementHeader';
 import PackageStatsCards from '../../components/admin/packages/PackageStatsCards';
 import PackageFiltersComponent from '../../components/admin/packages/PackageFilters';
@@ -7,6 +7,7 @@ import PackageTable from '../../components/admin/packages/PackageTable';
 import PackageDetailModal from '../../components/admin/packages/PackageDetailModal';
 import AddEditPackageModal from '../../components/admin/packages/AddEditPackageModal';
 import packageService from '../../services/packageService';
+import markupService from '../../services/markupService';
 
 const PackageManagementPage: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -55,6 +56,7 @@ const PackageManagementPage: React.FC = () => {
   const [games, setGames] = useState<string[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [vendorNames, setVendorNames] = useState<string[]>([]);
+  const [markups, setMarkups] = useState<MarkupOption[]>([]);
 
   // Load packages from API
   const loadPackages = async () => {
@@ -288,6 +290,19 @@ const PackageManagementPage: React.FC = () => {
   useEffect(() => {
     loadStats();
     loadFilterData();
+  }, []);
+
+  useEffect(() => {
+    const loadMarkups = async () => {
+      try {
+        const response = await markupService.getActiveMarkups();
+        setMarkups(response.markups || []);
+      } catch (error) {
+        console.error('Failed to load markups:', error);
+      }
+    };
+    
+    loadMarkups();
   }, []);
 
   // Handle filter changes
@@ -714,6 +729,7 @@ const PackageManagementPage: React.FC = () => {
         regions={regions}
         games={games}
         vendorNames={vendorNames}
+        // markups={markups}
       />
     </div>
   );

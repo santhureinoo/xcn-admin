@@ -24,6 +24,7 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import PackageManagementPage from './pages/admin/PackageManagementPage';
 import CurrencyManagementPage from './pages/admin/CurrencyManagementPage';
 import TransactionManagementPage from './pages/admin/TransactionManagementPage';
+import MarkupManagementPage from './pages/admin/MarkupManagementPage';
 
 // Protected route component for authenticated users
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
@@ -111,6 +112,16 @@ function AppRoutes() {
           } />
         } />
 
+        <Route path="/admin/markups" element={
+          <AdminRoute element={
+            <Layout>
+              <PageTransition>
+                <MarkupManagementPage />
+              </PageTransition>
+            </Layout>
+          } />
+        } />
+
         <Route path="/admin/transactions" element={
           <AdminRoute element={
             <Layout>
@@ -187,7 +198,7 @@ function AppRoutes() {
         {/* Admin dashboard redirect */}
         <Route path="/admin" element={
           <AdminRoute element={
-            <Navigate to="/admin/users" repla ce />
+            <Navigate to="/admin/users" />
           } />
         } />
 

@@ -39,6 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     { name: 'User Management', path: '/admin/users', icon: '👥' },
     { name: 'Package Management', path: '/admin/packages', icon: '📦' },
     { name: 'Currency Management', path: '/admin/currency', icon: '🪙' },
+    { name: 'Markup Management', path: '/admin/markups', icon: '📈' },
     { name: 'Transaction Management', path: '/admin/transactions', icon: '💰' },
     { name: 'Reports', path: '/admin/reports', icon: '📈' },
     { name: 'Settings', path: '/admin/settings', icon: '⚙️' },

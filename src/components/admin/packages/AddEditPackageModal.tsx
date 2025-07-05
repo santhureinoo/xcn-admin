@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Vendor, VendorPackage } from '../../../types/package';
 import currencyService from '../../../services/currencyService';
+import markupService from '../../../services/markupService';
+import packageService from '../../../services/packageService';
+import { MarkupOption, PriceCalculation } from '../../../types/package';
 
 interface AddEditPackageModalProps {
     package: Package | null;
@@ -41,10 +44,29 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
         resellKeyword: '',
         stock: undefined as number | undefined,
         discount: 0,
-        isPriceLocked: false
+        isPriceLocked: false,
+        markupId: '',
+        basePrice: 0
     });
     const [availableVendorPackages, setAvailableVendorPackages] = useState<VendorPackage[]>([]);
     const [selectedVendorPackages, setSelectedVendorPackages] = useState<VendorPackage[]>([]);
+    const [availableMarkups, setAvailableMarkups] = useState<MarkupOption[]>([]);
+    const [priceCalculation, setPriceCalculation] = useState<PriceCalculation | null>(null);
+
+    useEffect(() => {
+        const loadMarkups = async () => {
+            try {
+                const markups = await markupService.getActiveMarkups();
+                setAvailableMarkups(markups.markups || []);
+            } catch (error) {
+                console.error('Error loading markups:', error);
+            }
+        };
+        
+        if (isOpen) {
+            loadMarkups();
+        }
+    }, [isOpen]);
 
     // Reset form when modal opens/closes or package changes
     useEffect(() => {
@@ -59,6 +81,8 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
                     region: pkg.region,
                     gameName: pkg.gameName,
                     vendor: pkg.vendor,
+                    markupId: pkg.markupId || '',
+                    basePrice: pkg.basePrice || 0,
                     vendorPackageCodes: pkg.vendorPackageCode.split(','), // Use existing codes
                     vendorPrice: pkg.vendorPrice,
                     baseVendorCost: pkg.baseVendorCost || 0,
@@ -80,6 +104,8 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
                     gameName: '',
                     vendor: '',
                     vendorPackageCodes: [],
+                    markupId: '',
+                    basePrice: 0,
                     vendorPrice: 0,
                     baseVendorCost: 0,
                     resellKeyword: '',
@@ -192,6 +218,20 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
             fetchVendorRatesAndCalculate();
         }
     }, [selectedVendorPackages, pkg, formData.vendor]); // Add formData.vendor to dependencies
+
+    useEffect(() => {
+        if (formData.basePrice && formData.markupId) {
+            const selectedMarkup = availableMarkups.find(m => m.id === formData.markupId);
+            if (selectedMarkup) {
+                const calculation = packageService.calculatePriceWithMarkup(formData.basePrice, selectedMarkup);
+                setPriceCalculation(calculation);
+                setFormData(prev => ({ ...prev, price: calculation.finalPrice }));
+            }
+        } else if (formData.basePrice && !formData.markupId) {
+            setFormData(prev => ({ ...prev, price: formData.basePrice }));
+            setPriceCalculation(null);
+        }
+    }, [formData.basePrice, formData.markupId, availableMarkups]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -590,6 +630,39 @@ const AddEditPackageModal: React.FC<AddEditPackageModalProps> = ({
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Markup (Optional)
+                                    </label>
+                                    <select
+                                        name="markupId"
+                                        value={formData.markupId}
+                                        onChange={handleInputChange}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                    >
+                                        <option value="">No Markup</option>
+                                        {availableMarkups.map(markup => (
+                                            <option key={markup.id} value={markup.id}>
+                                                {markup.name} ({markup.displayValue})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Base Price (Before Markup)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="basePrice"
+                                        value={formData.basePrice}
+                                        onChange={handleInputChange}
+                                        step="0.01"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div> */}
                             </div>
                         </div>
 
