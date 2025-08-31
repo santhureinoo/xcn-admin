@@ -70,7 +70,7 @@ const RetailerXCoinPurchaseCard: React.FC<RetailerXCoinPurchaseCardProps> = ({
           <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">XCoin Received</p>
             <p className="text-xl font-bold text-green-600 dark:text-green-400">
-              {formatXCoin(transaction.xCoinAmount)}
+              {formatXCoin(transaction.totalCost)}
             </p>
           </div>
         </div>

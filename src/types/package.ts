@@ -124,13 +124,13 @@ export interface Vendor {
 }
 
 export interface PackageFilters {
-  region?: string;
-  gameName?: string;
-  vendor?: string;
-  status?: 'active' | 'inactive' | 'out_of_stock' | 'all';
+  region: string;
+  gameName: string;
+  vendor: string;
+  status?: string;//'active' | 'inactive' | 'out_of_stock' | 'all';
   search?: string;
-  sortBy?: 'name' | 'price' | 'createdAt' | 'updatedAt';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: string;//'name' | 'price' | 'createdAt' | 'updatedAt';
+  sortOrder?: string;//'asc' | 'desc';
   // Markup filters
   markupId?: string;
   hasMarkup?: boolean;

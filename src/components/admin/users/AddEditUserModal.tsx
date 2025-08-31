@@ -17,18 +17,23 @@ const AddEditUserModal: React.FC<AddEditUserModalProps> = ({
   loading = false
 }) => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    role: 'retailer' as 'retailer' | 'reseller' | 'admin',
-    status: 'active' as 'active' | 'inactive' | 'suspended',
-    balance: 0,
-    commission: 0, // For resellers
-    referralCode: '',
-    referredBy: ''
-  });
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  address: '',
+  role: 'retailer' as 'retailer' | 'reseller' | 'admin',
+  status: 'active' as 'active' | 'inactive' | 'suspended',
+  balance: 0,
+  commission: 0, // For resellers
+  referralCode: '',
+  referredBy: '',
+  smileCoinBalances: [
+    { region: 'Brazil', balance: 0 },
+    { region: 'Thailand', balance: 0 },
+    { region: 'Philippines', balance: 0 }
+  ]
+});
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -45,7 +50,14 @@ const AddEditUserModal: React.FC<AddEditUserModalProps> = ({
         balance: user.balance || 0,
         commission: user.commission || 0,
         referralCode: user.referralCode || '',
-        referredBy: user.referredBy || ''
+        referredBy: user.referredBy || '',
+        smileCoinBalances: user.smileCoinBalances && user.smileCoinBalances.length > 0
+          ? user.smileCoinBalances
+          : [
+              { region: 'Brazil', balance: 0 },
+              { region: 'Thailand', balance: 0 },
+              { region: 'Philippines', balance: 0 }
+            ]
       });
     } else {
       // Reset form for new user
@@ -60,7 +72,12 @@ const AddEditUserModal: React.FC<AddEditUserModalProps> = ({
         balance: 0,
         commission: 0,
         referralCode: '',
-        referredBy: ''
+        referredBy: '',
+        smileCoinBalances: [
+          { region: 'Brazil', balance: 0 },
+          { region: 'Thailand', balance: 0 },
+          { region: 'Philippines', balance: 0 }
+        ]
       });
     }
     setErrors({});
@@ -99,6 +116,7 @@ const AddEditUserModal: React.FC<AddEditUserModalProps> = ({
     if (formData.balance < 0) {
       newErrors.balance = 'Balance cannot be negative';
     }
+      // newErrors.smileCoinBalance = 'Smile coin balance cannot be negative';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -284,6 +302,38 @@ const AddEditUserModal: React.FC<AddEditUserModalProps> = ({
                 {errors.balance && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.balance}</p>
                 )}
+              </div>
+
+              {/* Smile Coin Balances */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Initial Smile Coin Balances
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {formData.smileCoinBalances.map((balance, index) => (
+                    <div key={balance.region} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {balance.region}
+                      </h4>
+                      <input
+                        type="number"
+                        value={balance.balance}
+                        onChange={(e) => {
+                          const newBalances = [...formData.smileCoinBalances];
+                          newBalances[index].balance = parseFloat(e.target.value) || 0;
+                          setFormData(prev => ({
+                            ...prev,
+                            smileCoinBalances: newBalances
+                          }));
+                        }}
+                        min="0"
+                        step="1"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="0"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Commission (for resellers) */}

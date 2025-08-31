@@ -6,6 +6,10 @@ export interface User {
   role: 'retailer' | 'reseller' | 'admin';
   status: 'active' | 'inactive' | 'suspended';
   balance: number;
+  smileCoinBalances: Array<{
+    region: string;
+    balance: number;
+  }>;
   totalSpent: number;
   totalOrders: number;
   createdAt: string;

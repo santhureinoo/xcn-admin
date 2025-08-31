@@ -68,7 +68,7 @@ const VendorExchangeCard: React.FC<VendorExchangeCardProps> = ({
           <div className="text-center flex-1">
             <p className="text-sm text-gray-600 dark:text-gray-400">From XCoin</p>
             <p className="text-lg font-bold text-red-600 dark:text-red-400">
-              -{formatXCoin(transaction.xCoinAmount)}
+              -{formatXCoin(transaction.totalCost)}
             </p>
           </div>
           <div className="mx-4">

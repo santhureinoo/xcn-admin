@@ -45,6 +45,7 @@ export interface UserStatsResponse {
 
 export interface RechargeRequest {
   amount: number;
+  region?: string;
   notes?: string;
 }
 
@@ -61,6 +62,28 @@ export interface RechargeResponse {
     newBalance: number;
     rechargedBy: string;
     timestamp: string;
+  };
+}
+
+export interface SmileRechargeResponse {
+  success: boolean;
+  user: {
+    id: string;
+    region: string;
+    smileCoinBalances: Array<{
+      region: string;
+      balance: number;
+    }>;
+  };
+  message: string;
+  transaction: {
+    amount: number;
+    region: string;
+    newBalance: number;
+    rechargedBy: string;
+    timestamp: string;
+    notes: string | null;
+    currency: string;
   };
 }
 
@@ -169,6 +192,16 @@ class UserService {
     } catch (error: any) {
       console.error('Error recharging user balance:', error);
       throw new Error(error.response?.data?.message || 'Failed to recharge user balance');
+    }
+  }
+
+  async rechargeSmileBalance(id: string, rechargeData: RechargeRequest): Promise<SmileRechargeResponse> {
+    try {
+      const response = await axiosInstance.post(`${this.baseUrl}/${id}/recharge-smile`, rechargeData);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error recharging user Smile coin balance:', error);
+      throw new Error(error.response?.data?.message || 'Failed to recharge user Smile coin balance');
     }
   }
 

@@ -22,14 +22,16 @@ const PackageDetailModal: React.FC<PackageDetailModalProps> = ({
 }) => {
   if (!isOpen || !pkg) return null;
 
-  const getStatusColor = (status: Package['status']) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-      case 'out_of_stock':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+  const getStatusColor = (packageStatus: number) => {
+    switch (packageStatus) {
+      case 1:
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'; // active
+      case 2:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'; // inactive
+      case 3:
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'; // deleted
+      case 4:
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'; // out of stock
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
@@ -147,8 +149,16 @@ const PackageDetailModal: React.FC<PackageDetailModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Status
                     </label>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(pkg.status)}`}>
-                      {pkg.status.replace('_', ' ').toUpperCase()}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(pkg.packageStatus)}`}>
+                      {(() => {
+                        switch (pkg.packageStatus) {
+                          case 1: return 'ACTIVE';
+                          case 2: return 'INACTIVE';
+                          case 3: return 'DELETED';
+                          case 4: return 'OUT OF STOCK';
+                          default: return 'UNKNOWN';
+                        }
+                      })()}
                     </span>
                   </div>
 
@@ -371,12 +381,12 @@ const PackageDetailModal: React.FC<PackageDetailModalProps> = ({
               <div className="flex items-center space-x-3">
                 <button
                   onClick={handleToggleStatus}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${pkg.status === 'active'
+                  className={`px-4 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${pkg.packageStatus === 1
                       ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 focus:ring-yellow-500 dark:bg-yellow-900 dark:text-yellow-300'
                       : 'bg-green-100 text-green-800 hover:bg-green-200 focus:ring-green-500 dark:bg-green-900 dark:text-green-300'
                     }`}
                 >
-                  {pkg.status === 'active' ? 'Deactivate' : 'Activate'}
+                  {pkg.packageStatus === 1 ? 'Deactivate' : 'Activate'}
                 </button>
 
                 <button

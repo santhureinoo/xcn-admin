@@ -95,6 +95,16 @@ export interface StockUpdateResponse {
   };
 }
 
+export const initialPackageFilter = {
+  region: 'all',
+  gameName: 'all',
+  vendor: 'all',
+  status: 'all',
+  search: '',
+  sortBy: 'createdAt',
+  sortOrder: 'desc',
+}
+
 class PackageService {
   private baseUrl = '/packages';
 
@@ -143,7 +153,15 @@ class PackageService {
     }
   }
 
-  async getPackages(filters: PackageFilters = {}, page = 1, limit = 50): Promise<PackagesResponse> {
+  async getPackages(filters: PackageFilters = {
+    region: 'all',
+    gameName: 'all',
+    vendor: 'all',
+    status: 'all',
+    search: '',
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  }, page = 1, limit = 50): Promise<PackagesResponse> {
     try {
       const params = new URLSearchParams();
 
@@ -198,7 +216,15 @@ class PackageService {
   async getAllPackages(): Promise<Package[]> {
     try {
       // Get all packages without pagination
-      const response = await this.getPackages({}, 1, 10000); // Large limit to get all
+      const response = await this.getPackages({
+        region: 'all',
+        gameName: 'all',
+        vendor: 'all',
+        status: 'all',
+        search: '',
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+      }, 1, 10000); // Large limit to get all
       return response.packages;
     } catch (error: any) {
       console.error('Error fetching all packages:', error);
@@ -334,7 +360,7 @@ class PackageService {
     }
   }
 
-  async togglePackageStatus(id: string): Promise<{ success: boolean; package: { id: string; status: string }; message: string }> {
+  async togglePackageStatus(id: string): Promise<{ success: boolean; package: { id: string; packageStatus: number }; message: string }> {
     try {
       const response = await axiosInstance.patch(`${this.baseUrl}/${id}/toggle-status`);
       return response.data;
@@ -367,7 +393,7 @@ class PackageService {
   async getRegions(): Promise<string[]> {
     try {
       // This could be a separate endpoint or derived from packages
-      const response = await this.getPackages({}, 1, 1000);
+      const response = await this.getPackages(initialPackageFilter, 1, 1000);
       const regions = Array.from(new Set(response.packages.map(pkg => pkg.region)));
       return regions.sort();
     } catch (error: any) {
@@ -379,7 +405,7 @@ class PackageService {
   async getGames(): Promise<string[]> {
     try {
       // This could be a separate endpoint or derived from packages
-      const response = await this.getPackages({}, 1, 1000);
+      const response = await this.getPackages(initialPackageFilter, 1, 1000);
       const games = Array.from(new Set(response.packages.map(pkg => pkg.gameName)));
       return games.sort();
     } catch (error: any) {
@@ -391,7 +417,7 @@ class PackageService {
   async getVendorNames(): Promise<string[]> {
     try {
       // This could be a separate endpoint or derived from packages
-      const response = await this.getPackages({}, 1, 1000);
+      const response = await this.getPackages(initialPackageFilter, 1, 1000);
       const vendors = Array.from(new Set(response.packages.map(pkg => pkg.vendor)));
       return vendors.sort();
     } catch (error: any) {
@@ -400,7 +426,7 @@ class PackageService {
     }
   }
 
-  async exportPackages(filters: PackageFilters = {}): Promise<{ success: boolean; data: any[]; total: number }> {
+  async exportPackages(filters: PackageFilters = initialPackageFilter): Promise<{ success: boolean; data: any[]; total: number }> {
     try {
       const exportFilters = {
         region: filters.region !== 'all' ? filters.region : undefined,
@@ -487,7 +513,7 @@ class PackageService {
   // NEW: Get packages by markup ID
   async getPackagesByMarkup(markupId: string, page = 1, limit = 50): Promise<PackagesResponse> {
     try {
-      return await this.getPackages({ markupId }, page, limit);
+      return await this.getPackages({ ...initialPackageFilter, markupId }, page, limit);
     } catch (error: any) {
       console.error('Error fetching packages by markup:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch packages by markup');

@@ -8,6 +8,7 @@ interface PackageFiltersProps {
   regions: string[];
   games: string[];
   vendors: string[];
+  loading?: boolean;
 }
 
 const PackageFilters: React.FC<PackageFiltersProps> = ({
@@ -16,7 +17,8 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
   onClearFilters,
   regions,
   games,
-  vendors
+  vendors,
+  loading = false
 }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -42,7 +44,8 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
         {hasActiveFilters() && (
           <button
             onClick={onClearFilters}
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+            disabled={loading}
+            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Clear All
           </button>
@@ -62,7 +65,8 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
               value={filters.search || ''}
               onChange={handleInputChange}
               placeholder="Search packages..."
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,10 +85,13 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
             name="region"
             value={filters.region || 'all'}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <option value="all">All Regions</option>
-            {regions.map(region => (
+            <option value="all">
+              {loading ? 'Loading regions...' : 'All Regions'}
+            </option>
+            {!loading && regions.map(region => (
               <option key={region} value={region}>{region}</option>
             ))}
           </select>
@@ -99,10 +106,13 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
             name="gameName"
             value={filters.gameName || 'all'}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <option value="all">All Games</option>
-            {games.map(game => (
+            <option value="all">
+              {loading ? 'Loading games...' : 'All Games'}
+            </option>
+            {!loading && games.map(game => (
               <option key={game} value={game}>{game}</option>
             ))}
           </select>
@@ -117,10 +127,13 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
             name="vendor"
             value={filters.vendor || 'all'}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <option value="all">All Vendors</option>
-            {vendors.map(vendor => (
+            <option value="all">
+              {loading ? 'Loading vendors...' : 'All Vendors'}
+            </option>
+            {!loading && vendors.map(vendor => (
               <option key={vendor} value={vendor}>{vendor}</option>
             ))}
           </select>
@@ -135,7 +148,8 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
             name="status"
             value={filters.status || 'all'}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -156,7 +170,8 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
               name="sortBy"
               value={filters.sortBy || 'createdAt'}
               onChange={handleInputChange}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="name">Name</option>
               <option value="price">Price</option>
@@ -173,7 +188,8 @@ const PackageFilters: React.FC<PackageFiltersProps> = ({
               name="sortOrder"
               value={filters.sortOrder || 'desc'}
               onChange={handleInputChange}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>

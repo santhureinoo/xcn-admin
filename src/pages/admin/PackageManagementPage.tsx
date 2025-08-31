@@ -51,11 +51,11 @@ const PackageManagementPage: React.FC = () => {
     sortOrder: 'desc'
   });
 
-  // Data for filters
-  const [regions, setRegions] = useState<string[]>([]);
-  const [games, setGames] = useState<string[]>([]);
+  // Static data for filters
+  const [regions] = useState<string[]>(['Malaysia', 'Myanmar', 'Brazil', 'Singapore', 'Thailand']);
+  const [games] = useState<string[]>(['Mobile Legends', 'Free Fire', 'PUBG Mobile', 'Genshin Impact']);
+  const [vendorNames] = useState<string[]>(['Razor Gold', 'Smile', 'Garena', 'Tencent']);
   const [vendors, setVendors] = useState<any[]>([]);
-  const [vendorNames, setVendorNames] = useState<string[]>([]);
   const [markups, setMarkups] = useState<MarkupOption[]>([]);
 
   // Load packages from API
@@ -66,8 +66,8 @@ const PackageManagementPage: React.FC = () => {
       const response = await packageService.getPackages(filters, currentPage, pageSize);
       setPackages(response.packages);
       setFilteredPackages(response.packages);
-      setTotalPages(response.pagination.totalPages);  // Use pagination object
-      setTotalPackages(response.pagination.total);    // Use pagination object
+      setTotalPages(response.pagination.totalPages);
+      setTotalPackages(response.pagination.total);
     } catch (error: any) {
       console.error('Failed to load packages:', error);
       setError(error.message || 'Failed to load packages');
@@ -91,207 +91,17 @@ const PackageManagementPage: React.FC = () => {
     }
   };
 
-  // Load filter data
-  const loadFilterData = async () => {
-    try {
-      const [regionsData, gamesData, vendorsData, vendorNamesData] = await Promise.all([
-        packageService.getRegions(),
-        packageService.getGames(),
-        packageService.getVendors(),
-        packageService.getVendorNames()
-      ]);
-
-      // setRegions(regionsData);
-      // setGames(gamesData);
-      // setVendors(vendorsData.vendors || []);
-
-      setRegions(['Malaysia', 'Myanmar', 'Brazil', 'Singapore', 'Thailand']);
-      setGames(['Mobile Legends', 'Free Fire', 'PUBG Mobile', 'Genshin Impact']);
-      setVendorNames(['Razor Gold', 'Smile', 'Garena', 'Tencent']);
-      setVendors([
-        {
-          id: '1',
-          name: 'Razor Gold',
-          region: 'Malaysia',
-          gameName: 'Mobile Legends',
-          packages: [
-            {
-              code: 'RG_ML_86',
-              name: '86 Diamonds',
-              price: 5.90,
-              currency: 'coin',
-              diamonds: 86,
-              description: 'Mobile Legends 86 Diamonds'
-            },
-            {
-              code: 'RG_ML_172',
-              name: '172 Diamonds',
-              price: 11.90,
-              currency: 'coin',
-              diamonds: 172,
-              description: 'Mobile Legends 172 Diamonds'
-            },
-            {
-              code: 'RG_ML_257',
-              name: '257 Diamonds',
-              price: 17.90,
-              currency: 'coin',
-              diamonds: 257,
-              description: 'Mobile Legends 257 Diamonds'
-            },
-            {
-              code: 'RG_ML_344',
-              name: '344 Diamonds',
-              price: 23.90,
-              currency: 'coin',
-              diamonds: 344,
-              description: 'Mobile Legends 344 Diamonds'
-            }
-          ]
-        },
-        {
-          id: '2',
-          name: 'Smile',
-          region: 'Myanmar',
-          gameName: 'Free Fire',
-          packages: [
-            {
-              code: 'SM_FF_100',
-              name: '100 Diamonds',
-              price: 2000,
-              currency: 'coin',
-              diamonds: 100,
-              description: 'Free Fire 100 Diamonds'
-            },
-            {
-              code: 'SM_FF_210',
-              name: '210 Diamonds',
-              price: 4000,
-              currency: 'coin',
-              diamonds: 210,
-              description: 'Free Fire 210 Diamonds'
-            },
-            {
-              code: 'SM_FF_520',
-              name: '520 Diamonds',
-              price: 10000,
-              currency: 'coin',
-              diamonds: 520,
-              description: 'Free Fire 520 Diamonds'
-            },
-            {
-              code: 'SM_FF_1080',
-              name: '1080 Diamonds',
-              price: 20000,
-              currency: 'coin',
-              diamonds: 1080,
-              description: 'Free Fire 1080 Diamonds'
-            }
-          ]
-        },
-        {
-          id: '3',
-          name: 'Garena',
-          region: 'Singapore',
-          gameName: 'PUBG Mobile',
-          packages: [
-            {
-              code: 'GR_PM_60',
-              name: '60 UC',
-              price: 1.98,
-              currency: 'coin',
-              diamonds: 60,
-              description: 'PUBG Mobile 60 UC'
-            },
-            {
-              code: 'GR_PM_325',
-              name: '325 UC',
-              price: 9.98,
-              currency: 'coin',
-              diamonds: 325,
-              description: 'PUBG Mobile 325 UC'
-            },
-            {
-              code: 'GR_PM_660',
-              name: '660 UC',
-              price: 19.98,
-              currency: 'coin',
-              diamonds: 660,
-              description: 'PUBG Mobile 660 UC'
-            },
-            {
-              code: 'GR_PM_1800',
-              name: '1800 UC',
-              price: 49.98,
-              currency: 'coin',
-              diamonds: 1800,
-              description: 'PUBG Mobile 1800 UC'
-            }
-          ]
-        },
-        {
-          id: '4',
-          name: 'Tencent',
-          region: 'Thailand',
-          gameName: 'Genshin Impact',
-          packages: [
-            {
-              code: 'TC_GI_60',
-              name: '60 Genesis Crystals',
-              price: 35,
-              currency: 'THB',
-              diamonds: 60,
-              description: 'Genshin Impact 60 Genesis Crystals'
-            },
-            {
-              code: 'TC_GI_300',
-              name: '300 Genesis Crystals',
-              price: 169,
-              currency: 'THB',
-              diamonds: 300,
-              description: 'Genshin Impact 300 Genesis Crystals'
-            },
-            {
-              code: 'TC_GI_980',
-              name: '980 Genesis Crystals',
-              price: 549,
-              currency: 'THB',
-              diamonds: 980,
-              description: 'Genshin Impact 980 Genesis Crystals'
-            },
-            {
-              code: 'TC_GI_1980',
-              name: '1980 Genesis Crystals',
-              price: 1090,
-              currency: 'THB',
-              diamonds: 1980,
-              description: 'Genshin Impact 1980 Genesis Crystals'
-            }
-          ]
-        }
-      ]);
-
-      // setVendorNames(vendorNamesData);
-    } catch (error: any) {
-      console.error('Failed to load filter data:', error);
-      // Set fallback data
-      setRegions(['Malaysia', 'Myanmar', 'Brazil', 'Singapore', 'Thailand']);
-      setGames(['Mobile Legends', 'Free Fire', 'PUBG Mobile', 'Genshin Impact']);
-      setVendorNames(['Razor Gold', 'Smile', 'Garena', 'Tencent']);
-    }
-  };
-
   // Load data on component mount and when filters/page change
   useEffect(() => {
     loadPackages();
   }, [filters, currentPage]);
 
-  // Load stats and filter data on component mount
+  // Load stats on component mount
   useEffect(() => {
     loadStats();
-    loadFilterData();
   }, []);
 
+  // Load markups
   useEffect(() => {
     const loadMarkups = async () => {
       try {
@@ -305,14 +115,49 @@ const PackageManagementPage: React.FC = () => {
     loadMarkups();
   }, []);
 
+  // Initialize vendors data
+  useEffect(() => {
+    setVendors([
+      {
+        id: '1',
+        name: 'Razor Gold',
+        region: 'Malaysia',
+        gameName: 'Mobile Legends',
+        packages: []
+      },
+      {
+        id: '2',
+        name: 'Smile',
+        region: 'Myanmar',
+        gameName: 'Free Fire',
+        packages: []
+      },
+      {
+        id: '3',
+        name: 'Garena',
+        region: 'Singapore',
+        gameName: 'PUBG Mobile',
+        packages: []
+      },
+      {
+        id: '4',
+        name: 'Tencent',
+        region: 'Thailand',
+        gameName: 'Genshin Impact',
+        packages: []
+      }
+    ]);
+  }, []);
+
   // Handle filter changes
   const handleFilterChange = (newFilters: Partial<PackageFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
     setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleClearFilters = () => {
-    setFilters({
+    const clearedFilters: PackageFilters = {
       region: 'all',
       gameName: 'all',
       vendor: 'all',
@@ -320,7 +165,9 @@ const PackageManagementPage: React.FC = () => {
       search: '',
       sortBy: 'createdAt',
       sortOrder: 'desc'
-    });
+    };
+    
+    setFilters(clearedFilters);
     setCurrentPage(1);
   };
 
@@ -354,8 +201,7 @@ const PackageManagementPage: React.FC = () => {
   };
 
   const handleToggleStatus = async (pkg: Package) => {
-    const newStatus = pkg.status === 'active' ? 'inactive' : 'active';
-    const action = newStatus === 'active' ? 'activate' : 'deactivate';
+    const action = pkg.packageStatus === 1 ? 'deactivate' : 'activate';
 
     if (window.confirm(`Are you sure you want to ${action} "${pkg.name}"?`)) {
       try {
@@ -363,14 +209,14 @@ const PackageManagementPage: React.FC = () => {
 
         // Update the package in the list
         const updatedPackages = packages.map(p =>
-          p.id === pkg.id ? { ...p, status: response.package.status as any } : p
+          p.id === pkg.id ? { ...p, packageStatus: response.package.packageStatus } : p
         );
         setPackages(updatedPackages);
         setFilteredPackages(updatedPackages);
 
         // Update selected package if it's the same one
         if (selectedPackage?.id === pkg.id) {
-          setSelectedPackage(prev => prev ? { ...prev, status: response.package.status as any } : null);
+          setSelectedPackage(prev => prev ? { ...prev, packageStatus: response.package.packageStatus } : null);
         }
 
         // Reload stats
@@ -385,7 +231,7 @@ const PackageManagementPage: React.FC = () => {
     }
   };
 
-  // NEW: Handle package updates (including stock updates)
+  // Handle package updates (including stock updates)
   const handlePackageUpdated = (updatedPackage: Package) => {
     // Update the package in the list
     const updatedPackages = packages.map(p =>
@@ -416,14 +262,10 @@ const PackageManagementPage: React.FC = () => {
         // Update existing package
         const response = await packageService.updatePackage(editingPackage.id, packageData);
 
-        console.log(response);
-
         // Update the package in the list
         const updatedPackages = packages.map(p =>
           p.id === editingPackage.id ? response.package : p
         );
-
-        console.log(updatedPackages);
 
         setPackages(updatedPackages);
         setFilteredPackages(updatedPackages);
@@ -522,6 +364,7 @@ const PackageManagementPage: React.FC = () => {
             regions={regions}
             games={games}
             vendors={vendorNames}
+            loading={false}
           />
         </div>
 
@@ -709,6 +552,8 @@ const PackageManagementPage: React.FC = () => {
         onClose={() => {
           setShowDetailModal(false);
           setSelectedPackage(null);
+          loadPackages();
+          loadStats();
         }}
         onEdit={handleEditPackage}
         onDelete={handleDeletePackage}
@@ -722,18 +567,18 @@ const PackageManagementPage: React.FC = () => {
         onClose={() => {
           setShowAddEditModal(false);
           setEditingPackage(null);
+          loadPackages();
+          loadStats();
         }}
         onSave={handleSavePackage}
         loading={saveLoading}
         vendors={vendors}
-        regions={regions}
-        games={games}
-        vendorNames={vendorNames}
-        // markups={markups}
+        // regions={regions}
+        // games={games}
+        // vendorNames={vendorNames}
       />
     </div>
   );
 };
 
 export default PackageManagementPage;
-

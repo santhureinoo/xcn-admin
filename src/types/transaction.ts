@@ -27,9 +27,8 @@ export interface RetailerXCoinPurchase extends BaseTransaction {
   fromCurrency: string;
   fromAmount: number;
   exchangeRate: number;
-  xCoinAmount: number;
-  processingFee: number;
   totalCost: number;
+  processingFee: number;
   paymentMethod: string;
   paymentReference?: string;
 }
@@ -94,7 +93,7 @@ export interface VendorExchange extends BaseTransaction {
   type: 'vendor_exchange';
   vendorName: string;
   vendorCurrency: string;
-  xCoinAmount: number;
+  totalCost: number;
   vendorCoinAmount: number;
   exchangeRate: number;
   packageId: string;

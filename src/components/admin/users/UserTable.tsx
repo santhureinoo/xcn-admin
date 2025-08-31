@@ -1,13 +1,13 @@
 import React from 'react';
-import { AdminUser } from '../../../types/admin';
+import { User } from '../../../types/user';
 
 interface UserTableProps {
-  users: AdminUser[];
+  users: User[];
   loading?: boolean;
-  onUserClick: (user: AdminUser) => void;
-  onEditUser: (user: AdminUser) => void;
-  onDeleteUser: (user: AdminUser) => void;
-  onToggleStatus: (user: AdminUser) => void;
+  onUserClick: (user: User) => void;
+  onEditUser: (user: User) => void;
+  onDeleteUser: (user: User) => void;
+  onToggleStatus: (user: User) => void;
 }
 
 const UserTable: React.FC<UserTableProps> = ({
@@ -101,7 +101,7 @@ const UserTable: React.FC<UserTableProps> = ({
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Balance
+                Balance(XCN/Smile)
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Total Spent
@@ -158,7 +158,9 @@ const UserTable: React.FC<UserTableProps> = ({
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  ${user.balance.toLocaleString()}
+                  ${user.balance.toLocaleString()}/{user.smileCoinBalances && user.smileCoinBalances.length > 0
+                    ? user.smileCoinBalances.map(sb => `${sb.balance} (${sb.region})`).join(', ')
+                    : '0'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   ${user.totalSpent.toLocaleString()}
@@ -262,6 +264,14 @@ const UserTable: React.FC<UserTableProps> = ({
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Balance:</span>
                 <span className="ml-1 font-medium text-gray-900 dark:text-white">${user.balance.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Smile Coins:</span>
+                <span className="ml-1 font-medium text-gray-900 dark:text-white">
+                  {user.smileCoinBalances && user.smileCoinBalances.length > 0
+                    ? user.smileCoinBalances.map(sb => `${sb.balance} (${sb.region})`).join(', ')
+                    : '0'}
+                </span>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Spent:</span>

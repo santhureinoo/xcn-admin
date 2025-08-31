@@ -22,9 +22,14 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
     onUserUpdated
 }) => {
     const [showRechargeModal, setShowRechargeModal] = useState(false);
+    const [showSmileRechargeModal, setShowSmileRechargeModal] = useState(false);
     const [rechargeAmount, setRechargeAmount] = useState('');
+    const [smileRechargeAmount, setSmileRechargeAmount] = useState('');
+    const [smileRechargeRegion, setSmileRechargeRegion] = useState('');
     const [rechargeNotes, setRechargeNotes] = useState('');
+    const [smileRechargeNotes, setSmileRechargeNotes] = useState('');
     const [rechargeLoading, setRechargeLoading] = useState(false);
+    const [smileRechargeLoading, setSmileRechargeLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState<User | null>(user);
 
     // Update currentUser when user prop changes
@@ -102,11 +107,68 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
         }
     };
 
+    const handleRechargeSmile = async () => {
+        if (!smileRechargeAmount || parseFloat(smileRechargeAmount) <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+
+        if (!smileRechargeRegion) {
+            alert('Please select a region');
+            return;
+        }
+
+        setSmileRechargeLoading(true);
+        try {
+            const response = await userService.rechargeSmileBalance(currentUser.id, {
+                amount: parseFloat(smileRechargeAmount),
+                region: smileRechargeRegion,
+                notes: smileRechargeNotes.trim() || undefined
+            });
+
+            if (response.success) {
+                // Update the current user's Smile coin balances
+                const updatedUser = {
+                    ...currentUser,
+                    smileCoinBalances: response.user.smileCoinBalances
+                };
+                setCurrentUser(updatedUser);
+
+                // Notify parent component about the update
+                if (onUserUpdated) {
+                    onUserUpdated(updatedUser);
+                }
+
+                // Show success message with transaction details
+                alert(`${response.message}\n\nTransaction Details:\nRegion: ${response.transaction.region}\nRecharge Amount: ${response.transaction.amount.toLocaleString()} Smile Coins\nNew Balance: ${response.transaction.newBalance.toLocaleString()} Smile Coins`);
+
+                // Reset form
+                setShowSmileRechargeModal(false);
+                setSmileRechargeAmount('');
+                setSmileRechargeRegion('');
+                setSmileRechargeNotes('');
+            }
+        } catch (error: any) {
+            console.error('Failed to recharge Smile coins:', error);
+            alert(error.message || 'Failed to recharge Smile coins. Please try again.');
+        } finally {
+            setSmileRechargeLoading(false);
+        }
+    };
+
     const handleCloseRechargeModal = () => {
         if (!rechargeLoading) {
             setShowRechargeModal(false);
             setRechargeAmount('');
             setRechargeNotes('');
+        }
+    };
+
+    const handleCloseSmileRechargeModal = () => {
+        if (!smileRechargeLoading) {
+            setShowSmileRechargeModal(false);
+            setSmileRechargeAmount('');
+            setSmileRechargeNotes('');
         }
     };
 
@@ -193,10 +255,118 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
             )}
 
+            {/* Recharge Smile Coin Modal */}
+            {showSmileRechargeModal && (
+                <div className="fixed inset-0 z-60 overflow-y-auto">
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                        onClick={handleCloseSmileRechargeModal}
+                    ></div>
+
+                    {/* Modal */}
+                    <div className="relative min-h-screen flex items-center justify-center p-4">
+                        <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                    Recharge Smile Coins
+                                </h3>
+                                <button
+                                    onClick={handleCloseSmileRechargeModal}
+                                    className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                                >
+                                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6">
+                                <div className="mb-4">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                        Recharge Smile Coins for: <span className="font-medium text-gray-900 dark:text-white">{user.firstName} {user.lastName}</span>
+                                    </p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                        Current Balance: <span className="font-medium text-gray-900 dark:text-white">
+                                            {user.smileCoinBalances && user.smileCoinBalances.length > 0
+                                                ? user.smileCoinBalances.map(sb => `${sb.balance} (${sb.region})`).join(', ')
+                                                : '0'} Smile Coins
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Region
+                                    </label>
+                                    <select
+                                        value={smileRechargeRegion}
+                                        onChange={(e) => setSmileRechargeRegion(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                    >
+                                        <option value="">Select a region</option>
+                                        <option value="Myanmar">Myanmar</option>
+                                        <option value="Brazil">Brazil</option>
+                                        <option value="Philippines">Philippines</option>
+                                    </select>
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Recharge Amount (Smile Coins)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={smileRechargeAmount}
+                                        onChange={(e) => setSmileRechargeAmount(e.target.value)}
+                                        placeholder="Enter amount to recharge"
+                                        min="0"
+                                        step="1"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Notes (Optional)
+                                    </label>
+                                    <textarea
+                                        value={smileRechargeNotes}
+                                        onChange={(e) => setSmileRechargeNotes(e.target.value)}
+                                        placeholder="Add notes for this transaction"
+                                        rows={3}
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        onClick={handleCloseSmileRechargeModal}
+                                        disabled={smileRechargeLoading}
+                                        className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleRechargeSmile}
+                                        disabled={smileRechargeLoading || !smileRechargeAmount || parseFloat(smileRechargeAmount) <= 0}
+                                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {smileRechargeLoading ? 'Processing...' : 'Recharge Smile Coins'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal */}
             <div className="relative min-h-screen flex items-center justify-center p-4">
-                <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -254,6 +424,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
                                     Recharge XCN
+                                </button>
+                                <button
+                                    onClick={() => setShowSmileRechargeModal(true)}
+                                    className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Recharge Smile Coins
                                 </button>
                                 <button
                                     onClick={() => onEdit(user)}
